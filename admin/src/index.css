@@ -1,0 +1,17 @@
+@tailwind base; @tailwind components; @tailwind utilities;
+:root { --leaf: 14 91 71; --leaf-dark: 10 69 54; --leaf-soft: 220 235 229; --mist: 238 243 241; }
+:root[data-mode='freelancer'] { --leaf: 30 64 120; --leaf-dark: 20 44 86; --leaf-soft: 223 232 246; --mist: 236 240 248; }
+@layer base {
+  body { @apply bg-mist text-ink font-sans antialiased; }
+  h1, h2, h3 { @apply font-display tracking-tight; }
+  :focus-visible { outline: 3px solid #F0A202; outline-offset: 2px; }
+}
+@layer components {
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-lg bg-leaf px-4 py-2.5 font-semibold text-white transition hover:bg-leaf-dark disabled:opacity-50; }
+  .btn-alt { @apply inline-flex items-center justify-center rounded-lg border border-ink/20 bg-white px-4 py-2.5 font-semibold hover:bg-leaf-soft disabled:opacity-50; }
+  .btn-danger { @apply inline-flex items-center justify-center rounded-lg border border-danger/40 bg-white px-4 py-2.5 font-semibold text-danger hover:bg-danger/10 disabled:opacity-50; }
+  .input { @apply w-full rounded-lg border border-ink/20 bg-white px-3 py-2.5 outline-none focus:border-leaf; }
+  .chip { @apply inline-block rounded-full bg-leaf-soft px-2.5 py-0.5 text-sm text-leaf-dark; }
+  .panel { @apply rounded-xl border border-ink/10 bg-white p-5; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
