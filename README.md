@@ -1,126 +1,109 @@
 # SkillSpot AI — Smart Micro-Gig & Local Skill Finder
 
-<<<<<<< HEAD
-React + TS + Tailwind · Express · MongoDB Atlas · Firebase Phone OTP · Socket.IO · LLM matching
+SkillSpot AI is a marketplace that helps people find and hire local freelancers, such as electricians, tutors, designers, and developers.
 
-## Quick start
-```bash
-# 1) Server
-cd server && cp .env.example .env     # MONGODB_URI (Atlas) aur JWT_SECRET bharein
-npm install && npm run seed && npm run dev
+- **Clients** post jobs and hire freelancers.
+- **Freelancers** find work and earn money.
+- **Admins** manage the platform and help maintain safety.
 
-# 2) Client (naye terminal mein)
-cd client && cp .env.example .env
-npm install && npm run dev            # http://localhost:5173
-
-# 3) Admin panel (alag app, naye terminal mein)
-cd admin && npm install && npm run dev   # http://localhost:5174
-```
-Folders: `server/` (API), `client/` (users ka app), `admin/` (admin panel). Teeno alag chalte hain; admin aur client dono `/api` par server se baat karte hain.
-Deploy par server ke `CLIENT_URL` mein dono URLs comma se alag karke dalein (client, admin).
-Bina Firebase ke test: login par `+923000000001` aur OTP `123456` (DEV_AUTH=true).
-Admin login: `admin/` app mein `/login` par `ADMIN_EMAIL` + password (`npm run set-admin-password` in server).
-
-## Atlas setup
-Atlas > Database > Connect > Drivers > string copy karke `MONGODB_URI` mein dalein. Network Access mein apna IP allow karein.
-
-## Firebase Phone OTP
-1. Firebase Console > Authentication > Sign-in method > **Phone** enable.
-2. Project settings > Your apps > Web app: config values `client/.env` (VITE_FIREBASE_*) mein.
-3. Authentication > Settings > Authorized domains mein apna domain add karein.
-4. Project settings > Service accounts > *Generate new private key*; JSON ek line mein `FIREBASE_SERVICE_ACCOUNT` mein, aur `DEV_AUTH=false` karein.
-Testing ke liye Firebase Console mein test phone numbers add kar sakte hain.
-
-## AI
-`ANTHROPIC_API_KEY` set karein (model `AI_MODEL`). Key na ho to rule-based fallback chalta hai, app phir bhi kaam karti hai.
-- `services/matching.js`: score = skills 45 + location 20 + budget 15 + experience 10 + rating 10 (busy users ×0.6). LLM sirf "kyun fit hai" explain karta hai.
-- `services/safety.js`: regex rules + optional LLM; flagged gigs `pending_review` mein jaate hain, admin approve/reject karta hai.
-
-## Deploy
-Server: Render/Railway (env vars set karein). Client: `npm run build`, Vercel/Netlify; `/api` aur `/socket.io` ko server par proxy/rewrite karein.
-
-## Production se pehle
-Real payments/escrow, image uploads, reviews moderation, rate limits per user, aur Terms/Privacy pages add karein.
-=======
-Apne shehar ke freelancers (electrician, tutor, designer, developer…) ko dhoondne aur hire karne ka marketplace. **Client** kaam post karta hai ya freelancer hire karta hai, **Freelancer** kaam leta hai aur paise kamata hai, aur **Admin** poore platform ko safe rakhta hai.
-
-**Tech:** React + TypeScript + Tailwind · Express · MongoDB Atlas · Firebase Phone OTP · Socket.IO · AI matching (Claude)
+**Technology Stack:** React, TypeScript, Tailwind CSS, Express.js, MongoDB Atlas, Firebase Phone OTP, Socket.IO, and AI-powered matching using Claude.
 
 ---
 
-## 1. Project ka structure
+## 1. Project Structure
 
-```
+```text
 skillspot-ai/
 ├── server/   API (Express + MongoDB + Socket.IO), port 5000
-├── client/   Users ka app (client + freelancer), port 5173
-└── admin/    Admin panel (alag app), port 5174
+├── client/   User application for clients and freelancers, port 5173
+└── admin/    Admin panel, port 5174
 ```
 
-Teeno alag chalte hain. `client` aur `admin` dono `/api` par ek hi `server` se baat karte hain.
+All three applications run separately. Both `client/` and `admin/` communicate with the same backend through `/api`.
 
-| App | Kaun use karta hai | Login kaise |
+| Application | Users | Authentication |
 |---|---|---|
-| `client/` | Client aur Freelancer | Phone number + OTP |
-| `admin/` | Sirf Admin | Email + password |
-| `server/` | Dono apps ka backend | — |
+| `client/` | Clients and freelancers | Phone number + OTP |
+| `admin/` | Administrators | Email + password |
+| `server/` | Backend for both applications | — |
 
 ---
 
-## 2. Setup (pehli baar)
+## 2. Installation and Setup
 
-### Zaroori cheezein
-- Node.js 18+
-- MongoDB Atlas account (free chalega)
-- Firebase project (sirf real SMS OTP ke liye; testing ke baghair bhi chalta hai)
+### Requirements
 
-### Step 1: Server
+- Node.js 18 or later
+- MongoDB Atlas account (the free tier is sufficient for development)
+- Firebase project (required for real SMS-based phone authentication)
+
+### Step 1: Start the Server
+
 ```bash
 cd server
-cp .env.example .env      # agar .env pehle se hai to ye skip karein
+cp .env.example .env
 npm install
+npm run seed
 npm run dev
 ```
 
-`server/.env` mein ye bharein:
+If the `.env` file already exists, skip the copy command.
 
-| Variable | Kya hai |
+Configure `server/.env` with the following variables:
+
+| Variable | Description |
 |---|---|
-| `MONGODB_URI` | Atlas > Database > Connect > Drivers se string. Network Access mein apna IP allow karein. |
-| `JWT_SECRET` | Koi lamba random text (kam az kam 32 characters). |
-| `CLIENT_URL` | Client aur admin ke URLs, comma se alag: `http://localhost:5173,http://localhost:5174` |
-| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Admin ka email aur password (kam az kam 8 characters). |
-| `ALLOW_TEST_OTP` | `true` = koi bhi phone + OTP `123456` (sirf testing). Live par **false**. |
-| `FIREBASE_SERVICE_ACCOUNT_FILE` | `./firebase-service-account.json` (neeche dekhein). |
-| `ANTHROPIC_API_KEY` | Optional. Na ho to rule-based AI chalta hai. |
-| `COMMISSION_RATE` / `TAX_RATE` | Default `0.10` aur `0.05`. |
+| `MONGODB_URI` | MongoDB Atlas connection string from Database → Connect → Drivers. Allow your IP address under Network Access. |
+| `JWT_SECRET` | A long, random secret string of at least 32 characters. |
+| `CLIENT_URL` | Client and admin URLs separated by commas, e.g. `http://localhost:5173,http://localhost:5174`. |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Administrator email and password. Use a strong password of at least 8 characters. |
+| `ALLOW_TEST_OTP` | Set to `true` only for testing with OTP `123456`. Set to `false` in production. |
+| `FIREBASE_SERVICE_ACCOUNT_FILE` | Path to the Firebase service account JSON file, e.g. `./firebase-service-account.json`. |
+| `ANTHROPIC_API_KEY` | Optional API key for Claude-powered AI features. Rule-based fallback may be available without it. |
+| `COMMISSION_RATE` / `TAX_RATE` | Default values: `0.10` and `0.05`, respectively. |
 
-Pehli baar server chalne par console mein `Admin login ready: <email>` likha aana chahiye.
+On the first server startup, the console should display a message similar to `Admin login ready: <email>` if the project is configured to initialize the admin account automatically.
 
-Admin password baad mein badalna ho to:
+To set or change the administrator password:
+
 ```bash
-cd server && npm run set-admin-password
+cd server
+npm run set-admin-password
 ```
 
-### Step 2: Client
+### Step 2: Start the Client Application
+
+Open a new terminal:
+
 ```bash
 cd client
 cp .env.example .env
 npm install
-npm run dev               # http://localhost:5173
+npm run dev
 ```
 
-### Step 3: Admin
+The client application runs at `http://localhost:5173`.
+
+### Step 3: Start the Admin Panel
+
+Open another terminal:
+
 ```bash
 cd admin
 npm install
-npm run dev               # http://localhost:5174
+npm run dev
 ```
-Login page: `http://localhost:5174/login`
 
-### Firebase Phone OTP (real SMS)
-1. Firebase Console > Authentication > Sign-in method > **Phone** ko enable karein.
-2. Project settings > Your apps > **Web app** banayein. Ye 4 values `client/.env` mein daalein:
+The admin panel runs at `http://localhost:5174`.
+
+Admin login page: `http://localhost:5174/login`
+
+### Firebase Phone OTP — Real SMS Authentication
+
+1. Open Firebase Console → Authentication → Sign-in method and enable **Phone** authentication.
+2. Under Project settings → Your apps, create a Web app.
+3. Add the following configuration to `client/.env`:
+
    ```env
    VITE_USE_FIREBASE=true
    VITE_FIREBASE_API_KEY=...
@@ -128,373 +111,434 @@ Login page: `http://localhost:5174/login`
    VITE_FIREBASE_PROJECT_ID=...
    VITE_FIREBASE_APP_ID=...
    ```
-3. Project settings > **Service accounts** > *Generate new private key*. Download hui JSON ko `server/firebase-service-account.json` naam se rakhein. **Ye secret hai, git par push na karein.**
-4. Authentication > Settings > **Authorized domains** mein apna domain add karein.
-5. `server/.env` mein `ALLOW_TEST_OTP=false` karein.
-6. Dono (server aur client) restart karein.
 
-Testing ke liye Firebase Console mein *test phone numbers* bhi add kar sakte hain (SMS kharch nahi hota).
+4. Open Project settings → Service accounts → **Generate new private key**.
+5. Save the downloaded JSON file as `server/firebase-service-account.json`. **Never commit this secret file to Git.**
+6. Under Authentication → Settings → **Authorized domains**, add your application domain.
+7. Set `ALLOW_TEST_OTP=false` in `server/.env`.
+8. Restart the server and client applications.
 
-### Bina Firebase ke test
-`client/.env` mein `VITE_USE_FIREBASE=false` aur server mein `ALLOW_TEST_OTP=true` rakhein. Login par koi bhi number likhein aur OTP `123456` daalein.
+Firebase test phone numbers can also be configured for testing without sending actual SMS messages.
 
----
+### Testing Without Firebase
 
-## 3. Platform kaise kaam karta hai (ek nazar mein)
+For local development, set `VITE_USE_FIREBASE=false` in `client/.env` and `ALLOW_TEST_OTP=true` in the server environment.
 
-```
-Login (phone OTP)
-   ↓
-Account banayein: Client ya Freelancer chunein (baad mein badla nahi ja sakta)
-   ↓
-Location do + shehar likhein  →  Account "Waiting for approval"
-   ↓
-Admin location check karke Approve karta hai
-   ↓
-Ab post / hire / chat / pay sab chalta hai
-```
+Use any phone number and enter OTP `123456`.
 
-> **Zaroori:** Jab tak admin approve na kare, aap sirf browse kar sakte hain. Gig post karna, hire karna, apply karna, message aur payment sab band rehta hai.
+**Important:** Never enable test OTP authentication in production.
 
 ---
 
-## 4. Client ke liye guide
+## 3. How the Platform Works
+
+```text
+Login using phone OTP
+        ↓
+Choose Client or Freelancer account type
+        ↓
+Provide city, address, and location
+        ↓
+Account waits for administrator approval
+        ↓
+Admin reviews the location and approves or rejects
+        ↓
+Approved users can post jobs, hire, chat, and use payment workflows
+```
+
+**Important:** Until the administrator approves an account, the user can browse the platform, but posting gigs, hiring, applying, messaging, and payment-related actions remain restricted.
+
+---
+
+## 4. Client Guide
 
 ![Client guide](docs/client.png)
 
-Client wo hai jisay kaam karwana hai (ghar ka kaam, tuition, design, website…).
+A client is someone who needs a service, such as home repairs, tutoring, graphic design, or website development.
 
-### 4.1 Account banana
-1. `http://localhost:5173` kholein, **Log in** dabayein.
-2. Phone number daalein (`03001234567` ya `+923001234567`), OTP likhein.
-3. **Set up your account** par **Client** chunein.
-4. Apna poora naam, shehar aur address likhein, aur browser ka **location access allow** karein. (Location ke baghair account submit nahi hota.)
-5. Account "approval ka intezar" mein chala jata hai. Notification aati hai: *"Account submitted"*.
-6. Admin ke approve karte hi notification aati hai: *"Your account is approved"*. Reject ho to wajah dikhti hai; **Settings** mein sahi location de kar dobara check ke liye bhej sakte hain.
+### 4.1 Creating an Account
 
-### 4.2 Freelancer dhoondna aur hire karna
-1. **Find freelancers** kholein.
-2. Search karein: naam/skill, shehar, "Verified only", aur radius (default 25 km). Result mein door/qareeb ke freelancers aate hain.
-3. **Verified** badge wale profile SkillSpot AI ki profile check pass kar chuke hote hain.
-4. Profile kholein, rating, skills, rate aur bio dekhein. Zaroorat ho to **Message** se baat karein.
-5. Apne **open gig** par freelancer ko **hire request** bhejein aur apni price likhein (Rs 300 se Rs 1,000,000 ke darmiyan).
-6. Request ka jawab **72 ghante** mein na aaye to wo khud expire ho jati hai.
+1. Open `http://localhost:5173` and select **Log in**.
+2. Enter your phone number, such as `03001234567` or `+923001234567`, and complete OTP verification.
+3. On the **Set up your account** screen, select **Client**.
+4. Enter your full name, city, and address, and allow browser location access. Location access is required to submit the account.
+5. Your account enters the pending-approval state. You should receive an **Account submitted** notification.
+6. Once the administrator approves the account, you should receive a **Your account is approved** notification. If rejected, the reason is displayed, and you can correct your location through Settings and resubmit it for review.
 
-### 4.3 Gig post karna (AI ke saath)
-1. **Post a gig** kholein.
-2. Apne alfaz mein likhein ke kya kaam chahiye. **AI** usay title, category, skills aur budget ke saath proper job post bana deta hai. Aap edit kar sakte hain.
-3. Post karte hi **safety check** chalta hai. Saaf gig foran live ho jata hai. Shak wala gig **"pending review"** mein jata hai, admin dekh kar approve ya reject karta hai.
-4. Aap ke open gigs aur unke status **Dashboard** par dikhte hain.
+### 4.2 Finding and Hiring Freelancers
 
-### 4.4 Matches aur AI assistant
-- **Matches:** gig ke liye sab se munasib freelancers score ke saath dikhte hain. Score yun banta hai:
+1. Open **Find freelancers**.
+2. Search by name or skill, filter by city, select **Verified only**, and adjust the search radius. The default radius is 25 km.
+3. Profiles with the **Verified** badge have passed SkillSpot AI's profile-review process.
+4. Open a profile to review the freelancer's rating, skills, hourly rate, and bio. Use **Message** if you need more information.
+5. Send a hire request for an open gig and specify your proposed price, between Rs 300 and Rs 1,000,000.
+6. If the freelancer does not respond within 72 hours, the request expires automatically.
 
-  | Cheez | Number |
-  |---|---|
-  | Skills match | 45 |
-  | Location | 20 |
-  | Budget | 15 |
-  | Experience | 10 |
-  | Rating | 10 |
+### 4.3 Posting a Gig with AI
 
-  Jo freelancer pehle se busy ho, uska score 0.6 se multiply ho jata hai. AI sirf "ye kyun fit hai" samjhata hai.
-- **Ask SkillSpot AI** (neeche daayen kone ka saffron button): hiring ke sawalon ka assistant.
+1. Open **Post a gig**.
+2. Describe the work in your own words. AI can help generate a structured job post containing a title, category, required skills, and budget. Review and edit the generated information before submission.
+3. A safety check runs after submission. Gigs considered safe may be published immediately, while suspicious gigs enter `pending_review` for administrator approval or rejection.
+4. View your gigs and their statuses on the Dashboard.
 
-### 4.5 Hire ka poora process
+### 4.4 Matching and the AI Assistant
+
+The matching system ranks freelancers according to their suitability for a gig.
+
+| Matching factor | Weight |
+|---|---:|
+| Skills match | 45 |
+| Location | 20 |
+| Budget | 15 |
+| Experience | 10 |
+| Rating | 10 |
+
+A freelancer marked as busy receives a score multiplied by `0.6`. The language model explains why a freelancer may be a good match; it does not replace the underlying scoring system.
+
+**Ask SkillSpot AI:** Use the saffron-colored button in the bottom-right corner to ask questions about hiring and freelancing.
+
+### 4.5 The Hiring Process
+
+```text
+Client sends a hire request
+        ↓
+Freelancer accepts or declines
+        ↓
+Client pays for the accepted job
+        ↓
+Payment is recorded as held
+        ↓
+Freelancer completes the work and communicates through chat
+        ↓
+Client marks the job complete and submits a rating
+        ↓
+Payment is released to the freelancer after applicable deductions
 ```
-Hire request bhejna ──► Freelancer Accept / Decline
-                              │
-                         Accept ho gaya
-                              ▼
-              Client payment karta hai (SkillSpot ke paas "held")
-                              ▼
-                  Freelancer kaam karta hai, chat hoti hai
-                              ▼
-        Client "Complete" dabata hai + 1 se 5 rating deta hai
-                              ▼
-          Paise freelancer ko release (commission aur tax kat kar)
-```
 
-| Stage | Matlab |
+| Status | Meaning |
 |---|---|
-| `requested` | Request bheji, jawab ka intezar |
-| `accepted` | Freelancer ne maan li, kaam chal raha hai |
-| `completed` | Kaam mukammal, rating di gayi, paise release |
-| `declined` | Freelancer ne mana kar diya |
-| `cancelled` | Kisi ne cancel kar diya |
-| `expired` | 72 ghante mein jawab nahi aaya |
+| `requested` | Request submitted; awaiting a response |
+| `accepted` | Freelancer accepted the job |
+| `completed` | Work completed, rating submitted, and payment released |
+| `declined` | Freelancer declined the request |
+| `cancelled` | The job or request was cancelled |
+| `expired` | No response was received within 72 hours |
 
-**Payment kahan se karein:** **My hires** mein accepted job ke card par *"Next step: pay Rs …"* ka panel aata hai. Payment method (Easypaisa, JazzCash, Card, Bank) chunein aur **Pay** dabayein. Payment secure hote hi card par *"Payment secured"* likha aata hai aur **Mark complete & rate** ka button nazar aata hai. Freelancer ko card par intezar ka ya "payment secured" ka paigham dikhta hai.
+**How to make a payment:** Open **My hires** and locate the accepted job card. Select the payment option shown in the card, choose a payment method (Easypaisa, JazzCash, card, or bank transfer), and select **Pay**.
 
-**Payment ka usool:** paise pehle SkillSpot ke paas **held** hote hain. Jab tak aap kaam se khush ho kar "Complete" nahi dabate, freelancer ko paise nahi milte. **Complete** karne se pehle payment lazmi hai. Kaam cancel ho to held paise **refund** ho jate hain.
+After the payment is recorded, the card should display **Payment secured**, and the **Mark complete & rate** button should become available.
 
-> **Test mode:** abhi koi asli paisa nahi chalta. Payment methods (EasyPaisa, JazzCash, card, bank) sirf record hote hain, jab tak asli payment gateway na jura jaye.
+**Payment policy:** The intended workflow holds payment until the client confirms completion. However, the current payment methods are in **test mode**. They record payment selections but do not process real money until a payment gateway is integrated.
 
 ### 4.6 Chat
-- **Chat** icon se freelancer se private baat karein, live typing aur notifications ke saath.
-- **Phone number aur links tab tak chhupe rehte hain** jab tak dono ke darmiyan koi accepted job na ho. Pehle chat mein number likhein to wo `***` ho jata hai.
-- Scam jaisa message (advance paise, OTP, CNIC maangna) **bheja hi nahi jata**.
-- Shak wale messages admin ko review ke liye flag ho jate hain.
 
-### 4.7 Settings aur safety
-- **Settings:** profile, photo, location, blocked users, account deactivate.
-- Kisi ko **Block** kar sakte hain.
-- Koi profile, gig ya message galat lage to **Report** dabayein (scam, fake gig, harassment, spam…).
-- Hamesha paise **SkillSpot ke andar** dein. Kisi ko OTP ya CNIC kabhi na batayein.
+- Use the **Chat** icon to communicate privately with freelancers, with live typing indicators and notifications where implemented.
+- Phone numbers and links are hidden until an accepted job exists between the users.
+- Messages containing suspected scams, such as requests for advance payments, OTPs, or CNIC details, may be blocked.
+- Suspicious messages can be flagged for administrator review.
 
-### 4.8 Client ki hudood (anti-abuse)
-| Hadd | Value |
-|---|---|
-| Ek waqt mein open gigs | 5 |
-| Naye gigs 24 ghante mein | 5 |
-| Jawab ke muntazir hire requests | 5 |
-| Hire requests ek ghante mein | 20 |
-| Naye chats 24 ghante mein | 20 |
-| Gig ka budget | Rs 300 – Rs 1,000,000 |
-| Chat message | 1000 characters |
+### 4.7 Settings and Safety
+
+- Manage your profile, photo, location, blocked users, and account deactivation through Settings.
+- Block users when necessary.
+- Report suspicious profiles, gigs, messages, scams, harassment, or spam.
+- Use the platform's intended payment workflow, and never share OTPs or CNIC details with other users.
+
+### 4.8 Client Limits
+
+| Limit | Value |
+|---|---:|
+| Open gigs at one time | 5 |
+| New gigs within 24 hours | 5 |
+| Pending hire requests | 5 |
+| Hire requests per hour | 20 |
+| New chats within 24 hours | 20 |
+| Gig budget | Rs 300–Rs 1,000,000 |
+| Chat message length | 1,000 characters |
 
 ---
 
-## 5. Freelancer ke liye guide
+## 5. Freelancer Guide
 
 ![Freelancer guide](docs/freelancer.png)
 
-Freelancer wo hai jo apni skill se kaam karta aur kamata hai.
+A freelancer provides services using their skills and earns money by completing jobs.
 
-### 5.1 Account banana
-1. Login karein (phone + OTP).
-2. **Set up your account** par **Freelancer** chunein.
-3. Naam, shehar, address aur location allow karein. Phir admin ke approve karne ka intezar karein (browse kar sakte hain).
-4. Freelancer ka interface **neeli (blue) theme** mein hota hai, client ka hara.
+### 5.1 Creating an Account
 
-### 5.2 Profile mukammal karna
-**Profile & settings** mein bharein:
-- Asli poora naam (sirf huroof, numbers nahi)
-- **Saaf profile photo**
-- **Bio** (kam az kam 60 characters) jisme apni main skill ka zikr ho
-- **Kam az kam 2 skills**
-- Shehar, tajurba (saalon mein), hourly rate (Rs 100 se Rs 20,000)
-- Availability (available / busy)
+1. Log in using your phone number and OTP.
+2. Select **Freelancer** on the **Set up your account** screen.
+3. Enter your name, city, and address, and allow location access.
+4. Wait for administrator approval. You can browse while approval is pending.
+5. The freelancer interface uses a blue theme, while the client interface uses a green theme.
 
-Dashboard par **Profile strength %** dikhta hai. Jitna zyada mukammal, utne zyada hire requests.
+### 5.2 Completing Your Profile
 
-### 5.3 Verified badge lena
-1. Profile mukammal karke **verification ke liye bhejein**. (Din mein 5 baar tak.)
-2. **AI review** profile check karta hai: asli naam, photo, bio ki quality, skills, rate, aur ye ke bio kisi aur ki copy to nahi. 80 ya zyada score aur koi risk na ho to pass.
-3. Pass hone par admin dekh kar **Verified** karta hai. Fail ho to wajah likhi aati hai ke kya theek karna hai.
-4. Verified badge se clients ka bharosa aur hire hone ke chances barhte hain.
-5. Ye ID/CNIC check nahi, sirf profile ki mukammaliyat, quality aur safety ka check hai.
+Open **Profile & settings** and provide:
 
-### 5.4 Kaam dhoondna
-- **Find jobs:** clients ke open gigs dekhein, shehar aur category se filter karein. Client ko message karke detail pooch sakte hain, ya hire request ka intezar karein.
-- **Matches:** aap ki skills, location, rate aur tajurbe se mel khate jobs, score ke saath.
-- **Ask SkillSpot AI:** freelancing ke sawalon ka assistant.
+- Your full name.
+- A clear profile photo.
+- A bio of at least 60 characters describing your main skill.
+- At least two skills.
+- Your city and years of experience.
+- An hourly rate between Rs 100 and Rs 20,000.
+- Your availability status: available or busy.
 
-### 5.5 Hire request ka jawab dena
-1. Nayi request par notification aati hai aur **Job requests** par lal badge dikhta hai.
-2. Detail (kaam, price, client ka note) dekh kar **Accept** ya **Decline** karein.
-3. **72 ghante** mein jawab na diya to request expire ho jati hai.
-4. Accept karte hi:
-   - Job **in progress** ho jata hai.
-   - Us gig ki baaki requests khud decline ho jati hain.
-   - Client ko payment karne ka notification jata hai.
-5. Jab client payment kar de, aap ko *"Payment secured"* ka notification milta hai. **Kaam ab shuru karein.** Paise SkillSpot ke paas mehfooz hain.
-6. Accept hone ke baad chat mein phone number aur links **ab dikhne lagte hain**, isliye zaroori tafseel share kar sakte hain.
+The Dashboard displays a **Profile strength** percentage. A more complete profile can help clients evaluate your services.
 
-### 5.6 Kaam mukammal hona aur paise milna
-Client "Complete" dabata aur rating deta hai, phir paise release hote hain.
+### 5.3 Getting the Verified Badge
 
-**Hisaab ki misaal (Rs 10,000 ka job):**
+1. Complete your profile and submit it for verification. The system allows up to five submissions per day.
+2. The AI review checks profile completeness and quality, including name, photo, bio, skills, rate, and possible copied text.
+3. A score of 80 or above with no identified risk may pass the automated review. The administrator makes the final verification decision.
+4. If the profile does not pass, review the displayed feedback and correct the relevant information.
+5. A Verified badge can help clients assess profile quality.
 
-| Cheez | Rate | Raqam |
-|---|---|---|
-| Job ki price | | Rs 10,000 |
+**Important:** This is a profile-quality and safety review, not an official identity or CNIC verification.
+
+### 5.4 Finding Work
+
+- **Find jobs:** Browse open gigs and filter by city or category.
+- **Matches:** Review jobs ranked according to skills, location, rate, and experience.
+- **Ask SkillSpot AI:** Ask questions about freelancing and finding work.
+
+You may message clients to clarify details or wait for hire requests, depending on the available workflow.
+
+### 5.5 Responding to Hire Requests
+
+1. New requests trigger a notification and a badge on **Job requests**.
+2. Review the job description, proposed price, and client's message.
+3. Select **Accept** or **Decline**.
+4. Requests expire if unanswered for 72 hours.
+5. When you accept a request:
+   - The job moves to the in-progress state.
+   - Other requests for the same gig are automatically declined.
+   - The client receives a payment notification.
+6. Once payment is recorded, you receive a **Payment secured** notification.
+7. Phone numbers and links become visible in chat after a job is accepted, allowing the parties to exchange necessary details.
+
+### 5.6 Completing Work and Receiving Payment
+
+The client marks the job complete and submits a rating. The system then records the payment release according to the configured commission and tax rates.
+
+**Example: Rs 10,000 job**
+
+| Item | Rate | Amount |
+|---|---:|---:|
+| Job price | — | Rs 10,000 |
 | SkillSpot commission | 10% | − Rs 1,000 |
-| Tax (withholding) | 5% | − Rs 500 |
-| **Aap ko milega** | | **Rs 8,500** |
+| Configured withholding tax | 5% | − Rs 500 |
+| **Freelancer's net amount** | — | **Rs 8,500** |
 
-Rates `server/.env` mein `COMMISSION_RATE` aur `TAX_RATE` se badle ja sakte hain. Tax rate ko apne asli qanooni rate ke mutabiq set karein.
+Configure `COMMISSION_RATE` and `TAX_RATE` in `server/.env`. Set tax rules according to applicable legal requirements and obtain appropriate professional advice.
 
-Aap ki rating har complete job ke saath update hoti hai.
+The freelancer's rating is updated as completed jobs are recorded.
 
-### 5.7 Cancel karne ke qawaid
-- Accept shuda job cancel karna ek **strike** hai.
-- **30 din mein 3 strikes** par account **7 din ke liye restricted** ho jata hai.
-- Request accept hone se pehle decline karne par koi strike nahi.
+### 5.7 Cancellation Rules
 
-### 5.8 Freelancer ki hudood
-| Hadd | Value |
-|---|---|
-| Ek waqt mein live services | 10 |
-| Din mein proposals | 20 |
-| Naye chats 24 ghante mein | 20 |
+- Cancelling an accepted job counts as a strike.
+- Three strikes within 30 days result in a seven-day account restriction.
+- Declining a request before accepting it does not count as a strike.
+
+### 5.8 Freelancer Limits
+
+| Limit | Value |
+|---|---:|
+| Live services at one time | 10 |
+| Proposals per day | 20 |
+| New chats within 24 hours | 20 |
 
 ---
 
-## 6. Admin ke liye guide
+## 6. Admin Guide
 
 ![Admin guide](docs/admin.png)
 
-Admin poore platform ka nigran hai: accounts approve karta, gigs aur reports dekhta, aur paison ka hisaab rakhta hai.
+The administrator oversees the platform, approves accounts, reviews gigs and reports, and monitors payment records.
 
-### 6.1 Admin banana aur login
-1. `server/.env` mein `ADMIN_EMAIL` aur `ADMIN_PASSWORD` set karein (ya `npm run set-admin-password` chalayein).
-2. Server start karein. Admin account khud ban jata hai.
-3. `http://localhost:5174/login` kholein, email aur password se login karein.
-4. Ghalat password 8 baar daalne par 15 minute ke liye block. Admin session 12 ghante chalta hai.
-5. Admin phone OTP se login **nahi** karta.
+### 6.1 Creating and Accessing the Admin Account
 
-### 6.2 Admin panel ke 7 tabs
+1. Configure `ADMIN_EMAIL` and `ADMIN_PASSWORD` in `server/.env`, or use the password-setting script.
+2. Start the server. If automatic initialization is configured, the admin account is created during startup.
+3. Open `http://localhost:5174/login` and sign in with the administrator email and password.
+4. The documented login policy blocks access for 15 minutes after eight failed password attempts. The admin session lasts 12 hours.
+5. Administrators do not use phone OTP to sign in.
 
-| Tab | Kaam |
+### 6.2 The Seven Admin Tabs
+
+| Tab | Purpose |
 |---|---|
-| **Overview** | "Needs your attention" ke 5 tiles (approve hone wale accounts, verify hone wale freelancers, review mein gigs, open reports, flagged chats). Tile par click karne se seedha wahan pahunchte hain. Neeche platform stats, paison ka hisaab aur top earners/spenders. |
-| **Users** | Search aur filters (role, status, verification). User par click karne se poori detail. |
-| **Gigs** | Review mein gigs approve ya remove. |
-| **Reports** | Users ki shikayaat par karrwai. |
-| **Flagged chats** | Safety rules ke flag kiye messages. |
-| **Payments** | Har payment, commission, tax aur "tax paid" ka tracking. |
-| **Community** | Clients aur Freelancers ke group chat ki moderation. |
+| **Overview** | Displays items needing attention, platform statistics, payment summaries, and top earners and spenders. |
+| **Users** | Search users and filter by role, status, or verification state. Select a user to view details. |
+| **Gigs** | Review, approve, or remove gigs awaiting moderation. |
+| **Reports** | Investigate user complaints and take action. |
+| **Flagged chats** | Review messages flagged by safety rules. |
+| **Payments** | Track payment records, commissions, taxes, and tax-paid status. |
+| **Community** | Moderate messages in client and freelancer group chats. |
 
-### 6.3 Naye accounts approve karna (sab se zaroori kaam)
-1. **Users** tab kholein. Default filter "Waiting for approval" hota hai.
-2. User par click karein. Detail mein dekhein:
-   - **Location check:** user ne jo shehar likha aur uski GPS location mein kitna farq hai. **60 km se zyada** farq ho to **FLAGGED** dikhta hai.
-   - **Risk score** aur wajohat.
-   - Bio, skills, tareekh-e-shamooliyat.
-3. Faisla karein:
-   - **Approve location:** account active.
-   - **Approve + verify:** freelancer ko saath hi Verified badge.
-   - **Reject:** wajah likhein. User ko wo wajah dikhti hai aur wo Settings se dobara location bhej sakta hai.
-4. User ko notification khud chali jati hai.
+### 6.3 Approving New Accounts
 
-Approved user agar approve hone ke baad **100 km se zyada** door chala jaye to uska account dobara check ke liye pending ho jata hai.
+1. Open **Users**. The default filter shows accounts waiting for approval.
+2. Select a user and review:
+   - The difference between the entered city and GPS location.
+   - The risk score and its associated reasons.
+   - The user's bio, skills, and registration date.
+3. Choose an action:
+   - **Approve location:** Activate the account.
+   - **Approve + verify:** Approve the account and verify the freelancer.
+   - **Reject:** Provide a reason that the user can review before resubmitting corrected location information.
+4. The user receives a notification of the decision.
 
-### 6.4 Freelancers ko verify karna
-1. **Users** > filter **"To verify"** (approved aur abhi verified nahi freelancers).
-2. Profile dekhein (AI review ka summary maujood hota hai).
-3. **Mark verified** dabayein, ya aisa profile ho to **Remove verified** (wajah ke saath).
-4. Verified user ko notification milti hai.
+A difference greater than 60 km between the stated city and GPS location is flagged for review. If an approved user later moves more than 100 km from the approved location, the account may be returned to pending review.
 
-### 6.5 User par karrwai
-User detail se:
+### 6.4 Verifying Freelancers
 
-| Action | Asar |
+1. Open **Users** and filter for **To verify**.
+2. Review the freelancer's profile and AI-review summary.
+3. Select **Mark verified** or **Remove verified**, providing a reason where required.
+4. The freelancer receives a notification.
+
+### 6.5 Taking Action on Users
+
+| Action | Effect |
 |---|---|
-| **Restrict** (1–90 din) | User kuch kaam nahi kar sakta, wajah dikhti hai. **Lift restriction** se hat jati hai. |
-| **Ban** | Account band, user logout, uske gigs aur services hata diye jate hain. **Unban** se wapas. |
-| **Edit note** | Sirf admins ko nazar aane wala private note. |
+| **Restrict** for 1–90 days | Limits selected user actions and displays the restriction reason. Restrictions can be removed using **Lift restriction**. |
+| **Ban** | Disables the account, logs the user out, and removes their gigs and services according to the implemented rules. **Unban** restores access. |
+| **Edit note** | Adds a private note visible only to administrators. |
 
-Detail mein ye bhi dikhta hai: kitna kharch/kamaya, escrow mein kitna, tax, aur us user ke khilaf aayi reports.
+User details may also show earnings, spending, held payments, taxes, and reports associated with the account.
 
-### 6.6 Gigs ki review
-1. **Gigs** tab > filter **pending review** (ya Overview ka "Gigs in review" tile).
-2. Gig ke saath **safety check** ka summary aur risk score dikhta hai.
-3. **Approve:** gig live. **Remove:** wajah likhein; pending proposals aur requests khud khatam, owner ko notification.
+### 6.6 Reviewing Gigs
 
-### 6.7 Reports sambhalna
-1. **Reports** tab kholein (open reports pehle).
-2. Report mein reason, reporter, jis par shikayat hai, aur chat ka pichla context dikhta hai.
-3. Karrwai chunein:
-   - **Dismiss:** shikayat ghalat.
-   - **Restrict 7 days:** 7 din ki pabandi.
-   - **Remove content:** gig ya community message hata dena.
-   - **Ban user:** account band.
-4. Ek hi user ki baaki open reports bhi isi faisle par band ho jati hain.
+1. Open **Gigs** and filter for `pending review`, or use the **Gigs in review** tile on the Overview page.
+2. Review the gig's safety summary and risk score.
+3. Select **Approve** to publish the gig or **Remove** and provide a reason. Removing a gig may close its pending proposals and requests and notify the owner.
 
-Khud-kaar nizam: **3 alag users** ek hi banday ko report karein to wo **3 din ke liye** khud restrict ho jata hai.
+### 6.7 Handling Reports
 
-### 6.8 Flagged chats
-1. **Flagged chats** tab mein wo messages hain jin par safety rule laga (jaise bahar paise maangna, OTP/CNIC).
-2. Dekh kar **Mark reviewed** dabayein. Zaroorat ho to us user par Users tab se karrwai karein.
+1. Open **Reports** and review open reports first.
+2. Check the reason, reporter, reported user, and relevant chat context.
+3. Choose an appropriate action:
+   - **Dismiss:** Close an unfounded report.
+   - **Restrict 7 days:** Restrict the account for seven days.
+   - **Remove content:** Remove a gig or community message.
+   - **Ban user:** Disable the account.
+4. Other open reports against the same user may also be closed as part of the implemented workflow.
 
-### 6.9 Paison ka hisaab
-- **Overview** mein: escrow mein raqam, released, refunded, freelancers ko diya gaya, commission (mili / baqi), tax (withheld / adaa / baqi), paid jobs.
-- **Payments** tab mein har payment ki table: job, client → freelancer, amount, commission, tax, net, status.
-- **Tax paid:** jab aap freelancer ka kata hua tax government ko jama kara dein, us payment par "Tax paid" ka checkbox tick karein, taake hisaab saaf rahe.
+The documented automated rule temporarily restricts a user for three days when three distinct users report them. This behavior should be tested carefully before production use.
 
-### 6.10 Community moderation
-- **Community** tab mein Clients room aur Freelancers room ke messages dikhte hain.
-- Ghalat message par **Delete** (sab ke liye hat jata hai).
-- Community mein phone numbers aur links hamesha chhupe rehte hain.
+### 6.8 Reviewing Flagged Chats
 
-### 6.11 Roz ka admin checklist
-1. Overview kholein, "Needs your attention" ke tiles dekhein.
-2. Naye accounts approve/reject karein.
-3. Review mein gigs dekhein.
-4. Open reports aur flagged chats nipta dein.
-5. Hafta/mahina: tax paid mark karein aur commission ka hisaab dekhein.
+1. Open **Flagged chats** to review messages flagged by safety rules, such as requests to exchange money outside the platform or share OTP/CNIC information.
+2. Select **Mark reviewed** after reviewing a message.
+3. Take further action through the Users tab when necessary.
+
+### 6.9 Monitoring Payments
+
+- The **Overview** page summarizes held, released, and refunded amounts, freelancer payouts, commission, tax, and completed jobs.
+- The **Payments** tab displays job, client, freelancer, amount, commission, tax, net amount, and status.
+- Mark **Tax paid** only after the relevant tax has actually been remitted to the appropriate authority.
+
+### 6.10 Community Moderation
+
+- The **Community** tab displays messages from the Clients and Freelancers rooms.
+- Use **Delete** to remove an inappropriate community message.
+- Phone numbers and links are intended to remain hidden in community messages.
+
+### 6.11 Daily Admin Checklist
+
+1. Open Overview and review the **Needs your attention** tiles.
+2. Approve or reject pending accounts.
+3. Review gigs awaiting moderation.
+4. Process open reports and flagged chats.
+5. Periodically reconcile tax records and commission totals.
 
 ---
 
-## 7. Safety ke khud-kaar qawaid (ek jagah)
+## 7. Automated Safety Rules
 
-| Qaida | Detail |
+| Rule | Behavior |
 |---|---|
-| Location check | Har naya account admin approve karta hai |
-| Gig safety check | Risky gig `pending review` mein jata hai |
-| Scam messages | Block (bheje hi nahi jate) |
-| Contact chhupana | Phone/links accepted job se pehle `***` |
-| Cancel strikes | 30 din mein 3 par 7 din ki pabandi |
-| Reports | 3 alag reporters par 3 din ki pabandi |
-| Request expiry | 72 ghante |
-| Test login | Live par band karna lazmi |
+| Location verification | New accounts require administrator approval. |
+| Gig safety | Risky gigs enter `pending_review`. |
+| Scam messages | Certain suspicious messages may be blocked before sending. |
+| Contact privacy | Phone numbers and links are hidden before an accepted job. |
+| Cancellation strikes | Three strikes within 30 days can trigger a seven-day restriction. |
+| Reports | Three distinct reports may trigger a three-day restriction. |
+| Request expiry | Hire requests expire after 72 hours without a response. |
+| Test authentication | Must be disabled in production. |
 
 ---
 
-## 8. Deploy
+## 8. Deployment
 
-- **Server:** Render / Railway par. Saare `.env` variables wahan set karein. `CLIENT_URL` mein client aur admin dono ke asli URLs comma se alag karke likhein.
-- **Client:** `cd client && npm run build`, phir Vercel/Netlify par. `/api` aur `/socket.io` ko server ki taraf proxy/rewrite karein.
-- **Admin:** `cd admin && npm run build`, alag Vercel/Netlify site par. `/api` ko server ki taraf rewrite karein (admin ko socket nahi chahiye).
+- **Server:** Deploy to Render, Railway, or another supported Node.js host. Configure all environment variables, including `CLIENT_URL` with both production client and admin URLs separated by commas.
+- **Client:** Run `npm run build` inside `client/` and deploy to Vercel or Netlify. Configure `/api` and `/socket.io` proxying or rewrites to reach the backend.
+- **Admin:** Run `npm run build` inside `admin/` and deploy it as a separate site. Configure `/api` rewrites to the backend.
 
-**Live karne se pehle:**
-- [ ] `ALLOW_TEST_OTP=false`
-- [ ] Firebase real OTP chalu
-- [ ] Mazboot `JWT_SECRET` aur admin password
-- [ ] `.env` aur `firebase-service-account.json` git mein na jayein
-- [ ] Asli payment gateway (abhi test mode hai)
-- [ ] Tax rate asli qanooni rate par
-- [ ] Terms / Privacy pages
+### Production Checklist
+
+- [ ] Set `ALLOW_TEST_OTP=false`.
+- [ ] Enable and test real Firebase phone authentication.
+- [ ] Use a strong `JWT_SECRET` and administrator password.
+- [ ] Ensure `.env` files and `firebase-service-account.json` are excluded from Git.
+- [ ] Integrate a real payment gateway; current payment methods are in test mode.
+- [ ] Configure the legally applicable tax rules.
+- [ ] Publish Terms of Service and Privacy Policy pages.
+- [ ] Test authorization, rate limiting, and sensitive API routes.
+- [ ] Verify that payment and refund records cannot be manipulated by clients.
 
 ---
 
-## 9. Masail aur hal
+## 9. Troubleshooting
 
-| Masla | Hal |
+| Problem | Suggested solution |
 |---|---|
-| `Cannot reach the server` | Server chal raha hai? `cd server && npm run dev`. |
-| Server start hi nahi hota (`Set MONGODB_URI and JWT_SECRET`) | `server/.env` mein dono bharein. |
-| `Mongo error` | Atlas ka URI/password check karein, Network Access mein apna IP allow karein. |
-| Browser mein CORS error | `CLIENT_URL` mein client aur admin ka sahi URL (http/https aur port samet) likhein, server restart. |
-| `Firebase server config missing` | Service account JSON ka path/file sahi rakhein aur server restart. |
-| OTP nahi aata | Firebase mein Phone enable, domain authorized, aur Pakistan SMS region blocked na ho. |
-| Test OTP `123456` kaam nahi karta | `ALLOW_TEST_OTP=true` hai? (Firebase wale mode mein ye band hona chahiye.) |
-| Admin: `Wrong email or password` | `.env` ka `ADMIN_EMAIL` aur password dekhein, ya `npm run set-admin-password` chalayein. |
-| Admin: `Too many admin login attempts` | 15 minute intezar. |
-| "Your account is waiting for admin approval" | Admin ke approve karne ka intezar, ya admin se kahein ke Users tab dekhe. |
-| "Pay for this job in SkillSpot first…" | Client **My hires** mein us job ke card par **Pay** dabaye. Payment ke baad hi **Mark complete & rate** chalta hai. |
+| `Cannot reach the server` | Confirm the backend is running with `cd server && npm run dev`. |
+| Server reports `Set MONGODB_URI and JWT_SECRET` | Configure both variables in `server/.env`. |
+| MongoDB connection error | Check the Atlas connection string, password, and Network Access IP allowlist. |
+| Browser CORS error | Set the correct client and admin URLs in `CLIENT_URL`, including protocol and port, then restart the server. |
+| Firebase server configuration missing | Check the service account file path and restart the server. |
+| OTP does not arrive | Confirm Phone authentication is enabled, the domain is authorized, and the SMS region is supported. |
+| Test OTP `123456` fails | Confirm `ALLOW_TEST_OTP=true` and that Firebase authentication is disabled for this test configuration. |
+| Admin login reports `Wrong email or password` | Check `ADMIN_EMAIL` and the password, or run `npm run set-admin-password`. |
+| Admin reports `Too many admin login attempts` | Wait for the 15-minute lockout to expire. |
+| Account is waiting for approval | Ask the administrator to review the account in the Users tab. |
+| Payment or completion action is unavailable | Check the job status and whether the client has recorded the required payment step. |
 
 ---
 
-## 10. Is version ka status (sach batayein)
+## 10. Current Implementation Status
 
-Server mein ye sab features tayyar hain: **gigs, services, proposals, bookings, payments (test mode), chat, community, reports, AI, admin**.
+The backend includes functionality for **gigs, services, proposals, bookings, test-mode payments, chat, community, reports, AI features, and administration**.
 
-Client app mein **payment ki screen shamil hai** (My hires ke job card par). Magar in ke screens abhi client mein nahi hain: **services, proposals aur community room**. Server (`/api/services`, `/api/proposals`, `/api/community`) in ke liye tayyar hai.
+The client application includes a payment screen accessible from the job card in **My hires**. However, dedicated client screens for **services, proposals, and community rooms** are not currently available, even though the backend has corresponding routes:
 
-**Admin panel** ka UI naya design kiya gaya hai aur server ke `/api/admin` routes se judta hai.
+- `/api/services`
+- `/api/proposals`
+- `/api/community`
+
+The admin panel has a redesigned interface connected to the backend's `/api/admin` routes.
+
+**Payment limitation:** Payment methods such as Easypaisa, JazzCash, cards, and bank transfers are currently recorded in test mode. No real funds are transferred until a payment gateway is integrated.
+
+Feature descriptions in this document reflect the supplied project information. Verify each feature against the current code and test environment before presenting it as production-ready.
 
 ---
 
-## 11. Aham commands
+## 11. Useful Commands
 
-| Kaam | Command |
+| Task | Command |
 |---|---|
-| Server chalana | `cd server && npm run dev` |
-| Client chalana | `cd client && npm run dev` |
-| Admin chalana | `cd admin && npm run dev` |
-| Admin password set | `cd server && npm run set-admin-password` |
-| Demo data saaf | `cd server && npm run clear-demo` |
-| Client/Admin build | `npm run build` (us folder ke andar) |
->>>>>>> 63d66e8fdf42fc64a5482c58c1817a2a1e08fbff
+| Start the server | `cd server && npm run dev` |
+| Start the client | `cd client && npm run dev` |
+| Start the admin panel | `cd admin && npm run dev` |
+| Set admin password | `cd server && npm run set-admin-password` |
+| Clear demo data | `cd server && npm run clear-demo` |
+| Build client or admin | Run `npm run build` inside the relevant directory |
+
+---
+
+## License
+
+No license has been specified. All rights remain with the respective copyright holders unless a license is added to this repository.
