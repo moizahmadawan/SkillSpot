@@ -233,7 +233,6 @@ export default function Admin() {
         {tab === 'payments' && <Payments />}
         {tab === 'community' && <Community />}
       </div>
-      
     </main>
   );
 }
