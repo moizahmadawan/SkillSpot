@@ -23,6 +23,7 @@ export const CATEGORIES = [
   { name: 'Accounting & Legal', icon: 'Calculator', hint: 'Bookkeeping, tax filing, documents, contracts', skills: ['accounting', 'tax filing', 'bookkeeping'] },
   { name: 'Other', icon: 'Briefcase', hint: 'Anything else you need done', skills: [] },
 ];
+
 export const CATEGORY_NAMES = CATEGORIES.map((c) => c.name);
 // Typical budget range (Rs) per category, used by the AI gig review to spot unrealistic posts.
 export const BUDGET_RANGE = { 'Graphic Design': [300, 150000], 'Web Development': [1000, 1000000], 'Mobile Apps': [3000, 1000000], 'Digital Marketing': [500, 500000], 'Writing & Translation': [300, 150000], 'Video & Animation': [500, 300000], Photography: [500, 300000], 'Tutoring & Teaching': [500, 100000], Electrician: [300, 100000], Plumbing: [300, 100000], Carpentry: [300, 300000], Painting: [500, 500000], 'AC & Appliance Repair': [300, 100000], 'Cleaning & Home Services': [300, 100000], 'Delivery & Errands': [300, 20000], 'Tailoring & Fashion': [300, 200000], 'Event Planning': [1000, 1000000], 'Data Entry & VA': [300, 150000], 'Car & Bike Repair': [300, 300000], 'Beauty & Makeup': [300, 200000], 'Accounting & Legal': [500, 300000] };
