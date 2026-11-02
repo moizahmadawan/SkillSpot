@@ -45,6 +45,7 @@ export default function App() {
       <Route path="/dashboard" element={<Protected><Dashboard /></Protected>} />
     </Routes>
     <AIButton />
+    
     <footer className="mt-16 border-t border-ink/10 py-6 text-center text-sm text-ink/60">SkillSpot AI: always keep payments inside the platform and never share your OTP or CNIC with anyone.</footer>
   </>);
 }
