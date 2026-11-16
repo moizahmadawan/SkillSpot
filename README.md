@@ -1,5 +1,22 @@
 # SkillSpot AI — Smart Micro-Gig & Local Skill Finder
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 SkillSpot AI is a marketplace that helps people find and hire local freelancers, such as electricians, tutors, designers, and developers.
 
 - **Clients** post jobs and hire freelancers.
