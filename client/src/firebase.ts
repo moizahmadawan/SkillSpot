@@ -19,7 +19,6 @@ import { initializeApp } from 'firebase/app';
 
 
 
-
 import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from 'firebase/auth';
 // Firebase is used only when VITE_USE_FIREBASE=true. Otherwise the app runs in test-login mode (any phone + OTP 123456).
 export const firebaseEnabled = !!import.meta.env.VITE_FIREBASE_API_KEY && import.meta.env.VITE_USE_FIREBASE === 'true';
